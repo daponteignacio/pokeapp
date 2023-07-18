@@ -7,6 +7,7 @@ import { pokeApi } from "@/api"
 import { Pokemon } from "@/interfaces"
 import { Layout } from "@/components/layouts/Layout";
 import { ls } from "@/utils";
+import { getPokemonInfo } from "@/utils/getPokemonInfo";
 
 interface Props {
     pokemon: Pokemon;
@@ -104,24 +105,21 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
     const { id = '' } = params as { id: string };
 
-    if (id.length === 0) {
+    const pokemon = await getPokemonInfo(id);
+
+    if (!pokemon) {
         return {
             redirect: {
-                destination: "/",
-                permanent: false
+                destination: '/',
+                permanent: false,
             }
         }
     }
-    const { data, status } = await pokeApi.get<Pokemon>(`/pokemon/${name}`)
 
-    const pokemon = {
-        id: data.id,
-        name: data.name,
-        sprites: data.sprites
-    }
     return {
         props: {
-            pokemon
-        }
+            pokemon,
+        },
+        revalidate: 86400
     }
 }
